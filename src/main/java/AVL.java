@@ -35,12 +35,19 @@ public class AVL {
         return noOfNodes;
     }
 
-    public int height(AVLNode node) {
-        if (node == null) {
-            return 0;
+    public int getHeight(AVLNode node) {
+        if (node == null) return 0;
+        int leftHeight = 0;
+        int rightHeight = 0;
+        if (node.left != null) {
+            leftHeight += getHeight(node.left);
+            leftHeight++;
         }
-
-        return node.height;
+        if (node.right != null) {
+            rightHeight += getHeight(node.right);
+            rightHeight++;
+        }
+        return Math.max(leftHeight, rightHeight);
     }
 
     public int getBalance(AVLNode node) {
@@ -48,7 +55,7 @@ public class AVL {
             return 0;
         }
 
-        return height(node.left) - height(node.right);
+        return getHeight(node.left) - getHeight(node.right);
     }
 
     public AVLNode rightRotate(AVLNode node) {
@@ -57,9 +64,6 @@ public class AVL {
 
         left.right = node;
         node.left = leftsRight;
-
-        node.height = Math.max(height(node.left), height(node.right)) + 1;
-        left.height = Math.max(height(left.left), height(left.right)) + 1;
 
         return left;
     }
@@ -71,9 +75,6 @@ public class AVL {
         right.left = node;
         node.right = rightsLeft;
 
-        node.height = Math.max(height(node.left), height(node.right)) + 1;
-        right.height = Math.max(height(right.left), height(right.right)) + 1;
-
         return right;
     }
 
@@ -83,11 +84,12 @@ public class AVL {
      * the inserted node
      *******************************************************/
     public AVLNode Insert(int key) {
-        if(Find(key) != null){
+        if (Find(key) != null) {
             AVLNode exist = Find(key);
             exist.count++;
             return null;
         }
+        noOfNodes++;
         return root = insert(root, key);
     } //end-Insert
 
@@ -103,8 +105,6 @@ public class AVL {
         } else {
             return node;
         }
-
-        node.height = Math.max(height(node.left), height(node.right)) + 1;
 
         int balance = getBalance(node);
 
@@ -139,6 +139,8 @@ public class AVL {
      *******************************************************/
     public int Delete(int key) {
         AVLNode deleted = delete(root, key);
+        if (deleted == null) return -1;
+        noOfNodes--;
         return 0;
     } //end-Delete
 
@@ -157,21 +159,19 @@ public class AVL {
             } else if (node.right == null) {
                 return node.left;
             } else {
-                if (node.left.height > node.right.height) {
-                    AVLNode temp = Max(node.left);
+                if (getHeight(node.left) > getHeight(node.right)) {
+                    AVLNode temp = MaxByNode(node.left);
                     node.key = temp.key;
 
                     node.left = delete(node.left, temp.key);
                 } else {
-                    AVLNode temp = Min(node.right);
+                    AVLNode temp = MinByNode(node.right);
                     node.key = temp.key;
 
                     node.right = delete(node.right, temp.key);
                 }
             }
         }
-
-        node.height = Math.max(height(node.right), height(node.left)) + 1;
 
         int balance = getBalance(node);
 
@@ -221,24 +221,32 @@ public class AVL {
     /*******************************************************
      * Returns a pointer to the node that contains the minimum key
      *******************************************************/
-    public AVLNode Min(AVLNode node) {
+    public AVLNode Min() {
+        return MinByNode(root);
+    } //end-Min
+
+    public AVLNode MinByNode(AVLNode node) {
         AVLNode current = node;
         while (current.left != null) {
             current = current.left;
         }
         return current;
-    } //end-Min
+    }
 
     /*******************************************************
      * Returns a pointer to the node that contains the maximum key
      *******************************************************/
-    public AVLNode Max(AVLNode node) {
+    public AVLNode Max() {
+        return MaxByNode(root);
+    } //end-Max
+
+    public AVLNode MaxByNode(AVLNode node) {
         AVLNode current = node;
         while (current.right != null) {
             current = current.right;
         }
         return current;
-    } //end-Max
+    }
 
     /*******************************************************
      * Returns the depth of tree. Depth of a tree is defined as
@@ -249,21 +257,39 @@ public class AVL {
             return -1;
         }
 
-        return root.height;
+        return getHeight(root);
     } //end-Depth
 
     /*******************************************************
      * Performs an inorder traversal of the tree and prints [key, count]
      * pairs in sorted order
      *******************************************************/
-    public void Print(AVLNode base) {
+    public void Print() {
+        PrintByNode(root);
+    }//end-Print
 
+    public void PrintByNode(AVLNode base) {
         if (base != null) {
-            Print(base.left);
-            System.out.print(base.key + (base.key == root.key ? "(R)" : "") + " - ");
-            Print(base.right);
+            PrintByNode(base.left);
+            System.out.print(base.key + (base.key == root.key ? "(R) " : " "));
+            PrintByNode(base.right);
         }
     }
 
-//end-Print
-};
+    public void PrintTree(AVLNode base, String indent, boolean last) {
+        if (base != null) {
+            System.out.print(indent);
+            if (last) {
+                System.out.print("R----");
+                indent += "   ";
+            } else {
+                System.out.print("L----");
+                indent += "|  ";
+            }
+            System.out.println(base.key);
+            PrintTree(base.left, indent, false);
+            PrintTree(base.right, indent, true);
+        }
+    }
+
+}
