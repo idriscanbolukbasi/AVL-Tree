@@ -1,6 +1,7 @@
 public class Main {
     public static void main(String[] args) {
         AVL tree = new AVL();
+        /*
         tree.Insert(1);
         tree.Insert(2);
         tree.Insert(3);
@@ -11,12 +12,12 @@ public class Main {
         tree.Insert(8);
         tree.Insert(9);
         tree.Insert(10);
-
+         */
+        tree.Insert(5);
         printTree(tree);
-
-        tree.Delete(3);
-
+        tree.Delete(5);
         printTree(tree);
+        System.out.println(tree.Root());
     }
 
     public static void printTree(AVL tree) {
